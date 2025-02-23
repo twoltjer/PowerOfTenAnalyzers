@@ -1,37 +1,9 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace PowerOfTenAnalyzers;
-
-[DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class GotoStatementAnalyzer : GotoAnalyzerBase
-{
-    protected override SyntaxKind GetSyntaxKind()
-    {
-        return SyntaxKind.GotoStatement;
-    }
-}
-
-[DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class GotoDefaultStatementAnalyzer : GotoAnalyzerBase
-{
-    protected override SyntaxKind GetSyntaxKind()
-    {
-        return SyntaxKind.GotoDefaultStatement;
-    }
-}
-
-[DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class GotoCaseStatementAnalyzer : GotoAnalyzerBase
-{
-    protected override SyntaxKind GetSyntaxKind()
-    {
-        return SyntaxKind.GotoCaseStatement;
-    }
-}
 
 public abstract class GotoAnalyzerBase : DiagnosticAnalyzer
 {

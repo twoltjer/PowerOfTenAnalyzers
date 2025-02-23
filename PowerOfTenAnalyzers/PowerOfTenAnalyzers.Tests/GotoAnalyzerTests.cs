@@ -1,20 +1,12 @@
-using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Testing.XUnit;
 using Xunit;
 namespace PowerOfTenAnalyzers.Tests;
 
-public class GotoAnalyzerTests
+public class GotoStatementAnalyzerTests : SampleAnalyzerTests<GotoStatementAnalyzer>
 {
-    private readonly string _gotoClassCode;
-
-    public GotoAnalyzerTests()
+    public GotoStatementAnalyzerTests() : base("TestGotoClass.cs")
     {
-        const string relativePath = "../../../../../PowerOfTenAnalyzers.Sample/TestGotoClass.cs";
-        var runningAssemblyLocation = Assembly.GetExecutingAssembly().Location;
-        var path = Path.Combine(runningAssemblyLocation, relativePath);
-        _gotoClassCode = File.ReadAllText(path);
     }
     
     [Fact]
@@ -23,16 +15,14 @@ public class GotoAnalyzerTests
     {
         var expected = AnalyzerVerifier<GotoStatementAnalyzer>.Diagnostic()
             .WithLocation(7, 9);
-        await AnalyzerVerifier<GotoStatementAnalyzer>.VerifyAnalyzerAsync(_gotoClassCode, expected);
+        await VerifyDiagnostics(expected);
     }
-    
-    [Fact]
-    [Trait("Category", "Unit")]
-    public async Task TestGotoDefaultStatementSyntax_ReportsDiagnostic_Always()
+}
+
+public class GotoCaseStatementAnalyzerTests : SampleAnalyzerTests<GotoCaseStatementAnalyzer>
+{
+    public GotoCaseStatementAnalyzerTests() : base("TestGotoClass.cs")
     {
-        var expected = AnalyzerVerifier<GotoDefaultStatementAnalyzer>.Diagnostic()
-            .WithLocation(20, 17);
-        await AnalyzerVerifier<GotoDefaultStatementAnalyzer>.VerifyAnalyzerAsync(_gotoClassCode, expected);
     }
     
     [Fact]
@@ -41,6 +31,22 @@ public class GotoAnalyzerTests
     {
         var expected = AnalyzerVerifier<GotoCaseStatementAnalyzer>.Diagnostic()
             .WithLocation(18, 17);
-        await AnalyzerVerifier<GotoCaseStatementAnalyzer>.VerifyAnalyzerAsync(_gotoClassCode, expected);
+        await VerifyDiagnostics(expected);
+    }
+}
+
+public class GotoDefaultStatementAnalyzerTests : SampleAnalyzerTests<GotoDefaultStatementAnalyzer>
+{
+    public GotoDefaultStatementAnalyzerTests() : base("TestGotoClass.cs")
+    {
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task TestGotoDefaultStatementSyntax_ReportsDiagnostic_Always()
+    {
+        var expected = AnalyzerVerifier<GotoDefaultStatementAnalyzer>.Diagnostic()
+            .WithLocation(20, 17);
+        await VerifyDiagnostics(expected);
     }
 }

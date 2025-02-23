@@ -1,4 +1,4 @@
-namespace PowerOfTenAnalyzers.Sample;
+namespace PowerOfTenAnalyzers.Sample.PT0101;
 
 public class TestGotoClass
 {
