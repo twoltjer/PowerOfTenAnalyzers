@@ -9,7 +9,7 @@ public class RecursionAnalyzer : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "PT0102";
 
-    private const string Category = "Naming";
+    private const string Category = "Design";
 
     private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId,
         "Recursion should be avoided",

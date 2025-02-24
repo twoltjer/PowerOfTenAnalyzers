@@ -9,7 +9,7 @@ public abstract class GotoAnalyzerBase : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "PT0101";
 
-    private const string Category = "Naming";
+    private const string Category = "Design";
 
     private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, "Goto statements should be avoided", "Goto statements should be avoided, as per Rule 1 of the Power of 10 rules from the NASA/JPL Laboratory for Reliable Software", Category,
         DiagnosticSeverity.Warning, isEnabledByDefault: true);

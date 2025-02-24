@@ -11,7 +11,7 @@ public class CrossFileRecursionTests : SampleAnalyzerTests<RecursionAnalyzer>
     }
 
     [Fact]
-    public async Task Test()
+    public async Task TestRecursionBetweenTwoFiles()
     {
         var expectedA = AnalyzerVerifier<RecursionAnalyzer>.Diagnostic().WithLocation("/0/Test1.cs", 7, 9).WithMessage("The method or constructor Method() could be called recursively: Method() -> Method() -> Method()");
         var expectedB = AnalyzerVerifier<RecursionAnalyzer>.Diagnostic().WithLocation("/0/Test0.cs", 7, 9).WithMessage("The method or constructor Method() could be called recursively: Method() -> Method() -> Method()");
