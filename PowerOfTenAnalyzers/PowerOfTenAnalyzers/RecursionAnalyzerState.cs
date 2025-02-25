@@ -34,19 +34,23 @@ public readonly struct RecursionAnalyzerState
             if (caller == null || callee == null)
                 continue;
             var found = false;
-            foreach (var call in _callGraph)
+            lock (_callGraph)
             {
-                if (call.CalledMethod.Equals(callee) && call.CallingMethod.Equals(caller))
+                foreach (var call in _callGraph)
                 {
-                    found = true;
-                    call.Locations.Add(invocation.GetLocation());
-                    break;
+                    if (call.CalledMethod.Equals(callee, SymbolEqualityComparer.Default) &&
+                        call.CallingMethod.Equals(caller, SymbolEqualityComparer.Default))
+                    {
+                        found = true;
+                        call.Locations.Add(invocation.GetLocation());
+                        break;
+                    }
                 }
-            }
 
-            if (!found)
-            {
-                _callGraph.Add(new MethodCallGraphEdge(caller, callee, [invocation.GetLocation()]));
+                if (!found)
+                {
+                    _callGraph.Add(new MethodCallGraphEdge(caller, callee, [invocation.GetLocation()]));
+                }
             }
         }
 
@@ -58,19 +62,23 @@ public readonly struct RecursionAnalyzerState
             if (caller == null || callee == null)
                 continue;
             var found = false;
-            foreach (var call in _callGraph)
+            lock (_callGraph)
             {
-                if (call.CalledMethod.Equals(callee) && call.CallingMethod.Equals(caller))
+                foreach (var call in _callGraph)
                 {
-                    found = true;
-                    call.Locations.Add(creation.GetLocation());
-                    break;
+                    if (call.CalledMethod.Equals(callee, SymbolEqualityComparer.Default) &&
+                        call.CallingMethod.Equals(caller, SymbolEqualityComparer.Default))
+                    {
+                        found = true;
+                        call.Locations.Add(creation.GetLocation());
+                        break;
+                    }
                 }
-            }
 
-            if (!found)
-            {
-                _callGraph.Add(new MethodCallGraphEdge(caller, callee, [creation.GetLocation()]));
+                if (!found)
+                {
+                    _callGraph.Add(new MethodCallGraphEdge(caller, callee, [creation.GetLocation()]));
+                }
             }
         }
     }
