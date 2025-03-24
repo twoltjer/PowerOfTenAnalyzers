@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Testing.XUnit;
 using Xunit;
 
-namespace PowerOfTenAnalyzers.Tests;
+namespace PowerOfTenAnalyzers.Tests.PT0102;
 
 public class CrossFileRecursionTests : SampleAnalyzerTests<RecursionAnalyzer>
 {

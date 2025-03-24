@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using NSubstitute;
 using Xunit;
 
-namespace PowerOfTenAnalyzers.Tests;
+namespace PowerOfTenAnalyzers.Tests.PT0102;
 
 public class MethodCallGraphPathTests
 {
@@ -31,11 +31,8 @@ public class MethodCallGraphPathTests
         var current = new MethodCallGraphPath();
         for (int i = 1; i < methods.Count; i++)
         {
-            Assert.True(current.TryAddEdge(new MethodCallGraphEdge(methods[i - 1], methods[i], [Location.None]),
-                out var newPathOptional, out var hasRecursion));
-            Assert.True(newPathOptional.HasValue);
-            Assert.False(hasRecursion);
-            current = newPathOptional.Value;
+            current = current.AddEdge(new MethodCallGraphEdge(methods[i - 1], methods[i], [Location.None]));
+            Assert.False(current.HasRecursion);
         }
 
         return current;

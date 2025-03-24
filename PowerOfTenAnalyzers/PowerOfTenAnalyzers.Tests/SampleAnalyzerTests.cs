@@ -31,14 +31,14 @@ public class SampleAnalyzerTests<TAnalyzer> where TAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static string GetDiagnosticId(Type type)
+    private static string GetDiagnosticId(Type? type)
     {
         while (type != null)
         {
             var fieldInfo = type.GetField("DiagnosticId", BindingFlags.Public | BindingFlags.Static);
             if (fieldInfo != null)
             {
-                return (string)fieldInfo.GetValue(null);
+                return (string)fieldInfo.GetValue(null)!;
             }
 
             type = type.BaseType;

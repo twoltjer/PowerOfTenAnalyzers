@@ -9,9 +9,8 @@
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
 
-        <RootNamespace>PowerOfTenAnalyzers</RootNamespace>
-        <AssemblyName>PowerOfTenAnalyzers</AssemblyName>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>RandomRecursiveProjectGenerator</RootNamespace>
+        <PackageId>RandomRecursiveProjectGenerator</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,5 +21,14 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Properties\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Properties\launchSettings.json" />
+    </ItemGroup>
+
 
 </Project>

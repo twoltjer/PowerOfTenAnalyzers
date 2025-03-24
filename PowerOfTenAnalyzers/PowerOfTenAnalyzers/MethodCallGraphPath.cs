@@ -2,61 +2,52 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 
 namespace PowerOfTenAnalyzers;
 
 public readonly struct MethodCallGraphPath : IEquatable<MethodCallGraphPath>
 {
-    public MethodCallGraphPath() : this(ImmutableList<MethodCallGraphEdge>.Empty)
+    public MethodCallGraphPath() : this(ImmutableList<MethodCallGraphEdge>.Empty, ImmutableList<IMethodSymbol>.Empty, ImmutableHashSet<IMethodSymbol>.Empty, false)
     {
     }
 
-    private MethodCallGraphPath(ImmutableList<MethodCallGraphEdge> edges)
+    private MethodCallGraphPath(ImmutableList<MethodCallGraphEdge> edges, ImmutableList<IMethodSymbol> stack, ImmutableHashSet<IMethodSymbol> stackSet, bool hasRecursion)
     {
         Edges = edges;
+        HasRecursion = hasRecursion;
+        _stack = stack;
+        _stackSet = stackSet;
     }
-    
+
     public ImmutableList<MethodCallGraphEdge> Edges { get; }
 
-    public bool TryAddEdge(MethodCallGraphEdge nextEdge, out MethodCallGraphPath? newPath, out bool hasRecursion)
+    private readonly ImmutableList<IMethodSymbol> _stack;
+
+    private readonly ImmutableHashSet<IMethodSymbol> _stackSet;
+    public bool HasRecursion { get; }
+    
+    public IMethodSymbol? Tail => _stack.Count > 0 ? _stack[_stack.Count - 1] : null;
+    public IMethodSymbol? Head => _stack.Count > 0 ? _stack[0] : null;
+
+    public MethodCallGraphPath AddEdge(MethodCallGraphEdge nextEdge)
     {
-        Debug.Assert(!HasRecursion(Edges));
-        if (Edges.Count > 0)
-        {
-            var lastEdgeEnd = Edges[Edges.Count - 1].CalledMethod;
-            if (!nextEdge.CallingMethod.Equals(lastEdgeEnd, SymbolEqualityComparer.Default))
-            {
-                newPath = null;
-                hasRecursion = false;
-                return false;
-            }
-        }
         var newEdges = Edges.Add(nextEdge);
-        newPath = new MethodCallGraphPath(newEdges);
-        hasRecursion = HasRecursion(newEdges);
-        return true;
-    }
-
-    private static bool HasRecursion(ImmutableList<MethodCallGraphEdge> edges)
-    {
-        if (edges.Count == 0)
-            return false;
-        
-        var stack = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
-        var firstEdge = edges[0];
-        stack.Add(firstEdge.CallingMethod);
-        foreach (var edge in edges)
+        var newStack = _stack;
+        var newStackSet = _stackSet;
+        if (Edges.Count == 0)
         {
-            Debug.Assert(stack.Contains(edge.CallingMethod));
-            if (!stack.Add(edge.CalledMethod))
-            {
-                // Stack already had this method called; recursion found!
-                return true;
-            }
+            newStack = newStack.Add(nextEdge.CallingMethod);
+            newStackSet = newStackSet.Add(nextEdge.CallingMethod);
         }
-
-        return false;
+        var previousCount = newStackSet.Count;
+        newStack = newStack.Add(nextEdge.CalledMethod);
+        newStackSet = newStackSet.Add(nextEdge.CalledMethod);
+        var newCount = newStackSet.Count;
+        var hasRecursion = previousCount == newCount;
+        var newPath = new MethodCallGraphPath(newEdges, newStack, newStackSet, hasRecursion);
+        return newPath;
     }
 
     public bool Equals(MethodCallGraphPath other)

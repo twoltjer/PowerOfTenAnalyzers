@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -85,86 +86,141 @@ public readonly struct RecursionAnalyzerState
 
     public void OnCompilationEnd(CompilationAnalysisContext compilationEndContext)
     {
-        // Do DFS looking for recursion
-        HashSet<MethodCallGraphPath> nonRecursivePaths = new HashSet<MethodCallGraphPath>();
-        HashSet<MethodCallGraphPath> reportedPaths = new HashSet<MethodCallGraphPath>();
+        var callGraphOrganizedByStartingEdge = new CallGraphOrganizedByStartingEdge();
+        callGraphOrganizedByStartingEdge.AddEdges(_callGraph);
+
+        var recursivePaths = new HashSet<MethodCallGraphPath>();
+        CreateSingleEdgePaths(recursivePaths, callGraphOrganizedByStartingEdge, out var incompletePaths);
+        while (incompletePaths.Count > 0)
+        {
+            incompletePaths = ExtendPaths(recursivePaths, incompletePaths, callGraphOrganizedByStartingEdge);
+        }
+
+        ReportDiagnostics(recursivePaths, compilationEndContext);
+    }
+
+    private void ReportDiagnostics(
+        IReadOnlyCollection<MethodCallGraphPath> recursivePaths,
+        CompilationAnalysisContext compilationEndContext
+        )
+    {
+        foreach (var path in recursivePaths)
+        {
+            foreach (var location in path.Edges[0].Locations)
+            {
+                compilationEndContext.ReportDiagnostic(
+                    Diagnostic.Create(
+                        _rule,
+                        location,
+                        MethodCallGraphPath.GetMethodName(path.Edges[0].CallingMethod),
+                        path.GetStringRepresentation()
+                        )
+                    );
+            }
+        }
+    }
+
+    private void CreateSingleEdgePaths(
+        ISet<MethodCallGraphPath> recursivePaths,
+        CallGraphOrganizedByStartingEdge callGraphOrganizedByStartingEdge,
+        out HashSet<MethodCallGraphPath> incompletePaths
+        )
+    {
+        incompletePaths = new HashSet<MethodCallGraphPath>();
         foreach (var edge in _callGraph)
         {
-            var oldPath = new MethodCallGraphPath();
-            var result = oldPath.TryAddEdge(edge, out var newPath, out bool hasRecursion);
-            Debug.Assert(result);
-            if (!result)
-                continue;
-
-            if (hasRecursion)
+            var path = new MethodCallGraphPath().AddEdge(edge);
+            if (path.HasRecursion)
             {
-                bool alreadyReported = false;
-                foreach (var reportedPath in reportedPaths)
-                {
-                    if (newPath!.Value.IsOrContainsPath(reportedPath))
-                    {
-                        alreadyReported = true;
-                        break;
-                    }
-                }
-
-                if (!alreadyReported)
-                {
-                    reportedPaths.Add(newPath!.Value);
-                    {
-                        foreach (var location in edge.Locations)
-                        {
-                            compilationEndContext.ReportDiagnostic(Diagnostic.Create(_rule, location,
-                                MethodCallGraphPath.GetMethodName(newPath!.Value.Edges[0].CallingMethod), newPath.Value.GetStringRepresentation()));
-                        }
-                    }
-                }
+                recursivePaths.Add(path);
             }
             else
             {
-                nonRecursivePaths.Add(newPath!.Value);
+                var tail = path.Tail!;
+                var isIncomplete = callGraphOrganizedByStartingEdge.GetEdgesFromMethod(tail).Count > 0;
+                if (isIncomplete)
+                {
+                    incompletePaths.Add(path);
+                }
             }
         }
+    }
 
-        while (nonRecursivePaths.Count > 0)
+    private HashSet<MethodCallGraphPath> ExtendPaths(ISet<MethodCallGraphPath> recursivePaths, ISet<MethodCallGraphPath> incompletePaths, CallGraphOrganizedByStartingEdge callGraphOrganizedByStartingEdge)
+    {
+        var nextIncompletePaths = new HashSet<MethodCallGraphPath>();
+        foreach (var path in incompletePaths)
         {
-            var nextNonRecursivePaths = new HashSet<MethodCallGraphPath>();
-            foreach (var path in nonRecursivePaths)
+            var tail = path.Tail!;
+            var nextEdges = callGraphOrganizedByStartingEdge.GetEdgesFromMethod(tail);
+            foreach (var edge in nextEdges)
             {
-                foreach (var methodCall in _callGraph)
+                var newPath = path.AddEdge(edge);
+                if (newPath.HasRecursion)
                 {
-                    if (path.TryAddEdge(methodCall, out var newPath, out bool hasRecursion))
+                    // Check if dropping the head is still recursive. If so, a we can disregard adding this recursion to the recursive paths
+                    var newPathEdges = newPath.Edges;
+                    Debug.Assert(newPathEdges.Count > 1);
+                    var headlessPath = new MethodCallGraphPath();
+                    for (int i = 1; i < newPathEdges.Count; i++)
                     {
-                        if (hasRecursion)
-                        {
-                            bool alreadyReported = false;
-                            foreach (var reportedPath in reportedPaths)
-                            {
-                                if (newPath!.Value.IsOrContainsPath(reportedPath))
-                                {
-                                    Debug.Assert(!newPath!.Value.Equals(reportedPath));
-                                    alreadyReported = true;
-                                    break;
-                                }
-                            }
+                        headlessPath = headlessPath.AddEdge(newPathEdges[i]);
+                    }
 
-                            if (!alreadyReported)
-                                foreach (var location in methodCall.Locations)
-                                {
-                                    compilationEndContext.ReportDiagnostic(Diagnostic.Create(_rule, location,
-                                        MethodCallGraphPath.GetMethodName(newPath!.Value.Edges[0].CallingMethod),
-                                        newPath.Value.GetStringRepresentation()));
-                                }
-                        }
-                        else
-                        {
-                            nextNonRecursivePaths.Add(newPath!.Value);
-                        }
+                    if (!headlessPath.HasRecursion)
+                    {
+                        recursivePaths.Add(newPath);
+                    }
+                }
+                else
+                {
+                    tail = newPath.Tail!;
+                    var isIncomplete = callGraphOrganizedByStartingEdge.GetEdgesFromMethod(tail).Count > 0;
+                    if (isIncomplete)
+                    {
+                        nextIncompletePaths.Add(newPath);
                     }
                 }
             }
-
-            nonRecursivePaths = nextNonRecursivePaths;
         }
+
+        return nextIncompletePaths;
+    }
+}
+
+public readonly struct CallGraphOrganizedByStartingEdge
+{
+    private readonly Dictionary<IMethodSymbol, HashSet<MethodCallGraphEdge>> _callGraphOrganized = new Dictionary<IMethodSymbol, HashSet<MethodCallGraphEdge>>(SymbolEqualityComparer.Default);
+
+    public CallGraphOrganizedByStartingEdge()
+    {
+    }
+
+    public void AddEdges(IReadOnlyCollection<MethodCallGraphEdge> edges)
+    {
+        foreach (var edge in edges)
+        {
+            AddEdge(edge);
+        }
+    }
+
+    private void AddEdge(MethodCallGraphEdge edge)
+    {
+        var caller = edge.CallingMethod;
+        if (!_callGraphOrganized.TryGetValue(caller, out var set))
+            set = _callGraphOrganized[caller] = new HashSet<MethodCallGraphEdge>();
+        set.Add(edge);
+    }
+
+    public IReadOnlyCollection<MethodCallGraphEdge> GetEdgesFromMethod(IMethodSymbol? method)
+    {
+        Debug.Assert(method != null);
+        if (method == null)
+            return Array.Empty<MethodCallGraphEdge>();
+        
+        if (_callGraphOrganized.TryGetValue(method, out var set))
+            return set;
+
+        return Array.Empty<MethodCallGraphEdge>();
     }
 }

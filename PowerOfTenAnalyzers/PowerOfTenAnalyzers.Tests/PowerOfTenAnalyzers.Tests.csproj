@@ -25,6 +25,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\RandomRecursiveProjectGenerator\RandomRecursiveProjectGenerator.Tests\RandomRecursiveProjectGenerator.Tests.csproj" />
+        <ProjectReference Include="..\..\RandomRecursiveProjectGenerator\RandomRecursiveProjectGenerator\RandomRecursiveProjectGenerator.csproj" />
         <ProjectReference Include="..\PowerOfTenAnalyzers\PowerOfTenAnalyzers.csproj"/>
     </ItemGroup>
 

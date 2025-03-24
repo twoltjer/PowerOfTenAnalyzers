@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerOfTenAnalyzers.Sample"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerOfTenAnalyzers.Tests", "PowerOfTenAnalyzers\PowerOfTenAnalyzers.Tests\PowerOfTenAnalyzers.Tests.csproj", "{DB96DCDD-EB0C-411A-B2B5-AE8C9B3EEC47}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomRecursiveProjectGenerator", "RandomRecursiveProjectGenerator\RandomRecursiveProjectGenerator\RandomRecursiveProjectGenerator.csproj", "{06F5E9B1-F689-470E-A7A7-6DDF62E77EE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomRecursiveProjectGenerator.Tests", "RandomRecursiveProjectGenerator\RandomRecursiveProjectGenerator.Tests\RandomRecursiveProjectGenerator.Tests.csproj", "{AB88EADF-1343-4149-B7A8-87DA2FD28DF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{DB96DCDD-EB0C-411A-B2B5-AE8C9B3EEC47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB96DCDD-EB0C-411A-B2B5-AE8C9B3EEC47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB96DCDD-EB0C-411A-B2B5-AE8C9B3EEC47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06F5E9B1-F689-470E-A7A7-6DDF62E77EE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06F5E9B1-F689-470E-A7A7-6DDF62E77EE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06F5E9B1-F689-470E-A7A7-6DDF62E77EE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06F5E9B1-F689-470E-A7A7-6DDF62E77EE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB88EADF-1343-4149-B7A8-87DA2FD28DF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB88EADF-1343-4149-B7A8-87DA2FD28DF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB88EADF-1343-4149-B7A8-87DA2FD28DF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB88EADF-1343-4149-B7A8-87DA2FD28DF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
