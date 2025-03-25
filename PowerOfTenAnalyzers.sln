@@ -10,6 +10,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomRecursiveProjectGener
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomRecursiveProjectGenerator.Tests", "RandomRecursiveProjectGenerator\RandomRecursiveProjectGenerator.Tests\RandomRecursiveProjectGenerator.Tests.csproj", "{AB88EADF-1343-4149-B7A8-87DA2FD28DF8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{1C6E3D23-6C50-426D-AEBE-8A765AFC744F}"
+	ProjectSection(SolutionItems) = preProject
+		10rules.pdf = 10rules.pdf
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

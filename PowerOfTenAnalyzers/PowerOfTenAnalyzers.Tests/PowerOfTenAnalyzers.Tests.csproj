@@ -30,4 +30,8 @@
         <ProjectReference Include="..\PowerOfTenAnalyzers\PowerOfTenAnalyzers.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="PT0201\" />
+    </ItemGroup>
+
 </Project>
